@@ -1,0 +1,3 @@
+[submodule "mrbgems/g/mruby-uv"]
+	path = mrbgems/g/mruby-uv
+	url = git://github.com/schmurfy/mruby-uv.git
