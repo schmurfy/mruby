@@ -247,12 +247,14 @@ mrb_sym mrb_intern(mrb_state *mrb,const char *cstr)
   void *mrb_realloc(mrb_state*, void*, size_t, const char *file, uint32_t line);
   void *mrb_realloc_simple(mrb_state*, void*, size_t, const char *file, uint32_t line);
   void *mrb_malloc_simple(mrb_state*, size_t, const char *file, uint32_t line);
+  void mrb_free(mrb_state*, void*, const char *file, uint32_t line);
   
   #define mrb_malloc(MRB, S1) mrb_malloc(MRB, S1, __FILE__, __LINE__);
   #define mrb_calloc(MRB, S1, S2) mrb_calloc(MRB, S1, S2, __FILE__, __LINE__);
   #define mrb_realloc(MRB, V, S1) mrb_realloc(MRB, V, S1, __FILE__, __LINE__);
   #define mrb_realloc_simple(MRB, V, S1) mrb_realloc_simple(MRB, V, S1, __FILE__, __LINE__);
   #define mrb_malloc_simple(MRB, S1) mrb_malloc_simple(MRB, S1, __FILE__, __LINE__);
+  #define mrb_free(MRB, V) mrb_free(MRB, V, __FILE__, __LINE__);
 #else
 
   void *mrb_malloc(mrb_state*, size_t);         /* raise RuntimeError if no mem */
@@ -260,12 +262,12 @@ mrb_sym mrb_intern(mrb_state *mrb,const char *cstr)
   void *mrb_realloc(mrb_state*, void*, size_t); /* ditto */
   void *mrb_realloc_simple(mrb_state*, void*, size_t); /* return NULL if no memory available */
   void *mrb_malloc_simple(mrb_state*, size_t);  /* return NULL if no memory available */
+  void mrb_free(mrb_state*, void*);
 #endif
 
 
 
 struct RBasic *mrb_obj_alloc(mrb_state*, enum mrb_vtype, struct RClass*);
-void mrb_free(mrb_state*, void*);
 
 mrb_value mrb_str_new(mrb_state *mrb, const char *p, size_t len);
 mrb_value mrb_str_new_cstr(mrb_state*, const char*);

@@ -176,6 +176,7 @@ gettimeofday_time(void)
   #undef mrb_realloc
   #undef mrb_realloc_simple
   #undef mrb_malloc_simple
+  #undef mrb_free
 #else
   #define _GC_PARAMS
   #define _GC_ARGS
@@ -253,10 +254,15 @@ mrb_calloc(mrb_state *mrb, size_t nelem, size_t len _GC_PARAMS)
 }
 
 void
-mrb_free(mrb_state *mrb, void *p)
+mrb_free(mrb_state *mrb, void *p _GC_PARAMS)
 {
   (mrb->allocf)(mrb, p, 0, mrb->ud);
 }
+
+#ifdef _MEM_PROFILER
+  #define mrb_free(MRB, V) mrb_free(MRB, V, __FILE__, __LINE__)
+#endif
+
 
 #ifndef MRB_HEAP_PAGE_SIZE
 #define MRB_HEAP_PAGE_SIZE 1024
