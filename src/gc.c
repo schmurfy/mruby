@@ -168,8 +168,21 @@ gettimeofday_time(void)
 #define GC_STEP_SIZE 1024
 
 
+#ifdef _MEM_PROFILER
+  #define _GC_PARAMS , const char *file, uint32_t line
+  #define _GC_ARGS , file, line
+  #undef mrb_malloc
+  #undef mrb_calloc
+  #undef mrb_realloc
+  #undef mrb_realloc_simple
+  #undef mrb_malloc_simple
+#else
+  #define _GC_PARAMS
+  #define _GC_ARGS
+#endif
+
 void*
-mrb_realloc_simple(mrb_state *mrb, void *p,  size_t len)
+mrb_realloc_simple(mrb_state *mrb, void *p,  size_t len _GC_PARAMS)
 {
   void *p2;
 
@@ -184,11 +197,11 @@ mrb_realloc_simple(mrb_state *mrb, void *p,  size_t len)
 
 
 void*
-mrb_realloc(mrb_state *mrb, void *p, size_t len)
+mrb_realloc(mrb_state *mrb, void *p, size_t len _GC_PARAMS)
 {
   void *p2;
 
-  p2 = mrb_realloc_simple(mrb, p, len);
+  p2 = mrb_realloc_simple(mrb, p, len _GC_ARGS);
   if (!p2 && len) {
     if (mrb->out_of_memory) {
       /* mrb_panic(mrb); */
@@ -206,19 +219,19 @@ mrb_realloc(mrb_state *mrb, void *p, size_t len)
 }
 
 void*
-mrb_malloc(mrb_state *mrb, size_t len)
+mrb_malloc(mrb_state *mrb, size_t len _GC_PARAMS)
 {
-  return mrb_realloc(mrb, 0, len);
+  return mrb_realloc(mrb, 0, len _GC_ARGS);
 }
 
 void*
-mrb_malloc_simple(mrb_state *mrb, size_t len)
+mrb_malloc_simple(mrb_state *mrb, size_t len _GC_PARAMS)
 {
-  return mrb_realloc_simple(mrb, 0, len);
+  return mrb_realloc_simple(mrb, 0, len _GC_ARGS);
 }
 
 void*
-mrb_calloc(mrb_state *mrb, size_t nelem, size_t len)
+mrb_calloc(mrb_state *mrb, size_t nelem, size_t len _GC_PARAMS)
 {
   void *p;
 
@@ -226,7 +239,7 @@ mrb_calloc(mrb_state *mrb, size_t nelem, size_t len)
       nelem <= SIZE_MAX / len) {
     size_t size;
     size = nelem * len;
-    p = mrb_realloc(mrb, 0, size);
+    p = mrb_realloc(mrb, 0, size _GC_ARGS);
 
     if (p) {
       memset(p, 0, size);
@@ -305,9 +318,9 @@ unlink_free_heap_page(mrb_state *mrb, struct heap_page *page)
 }
 
 static void
-add_heap(mrb_state *mrb)
+add_heap(mrb_state *mrb _GC_PARAMS)
 {
-  struct heap_page *page = (struct heap_page *)mrb_calloc(mrb, 1, sizeof(struct heap_page));
+  struct heap_page *page = (struct heap_page *)mrb_calloc(mrb, 1, sizeof(struct heap_page) _GC_ARGS);
   RVALUE *p, *e;
   struct RBasic *prev = NULL;
 
@@ -321,6 +334,10 @@ add_heap(mrb_state *mrb)
   link_heap_page(mrb, page);
   link_free_heap_page(mrb, page);
 }
+
+#ifdef _MEM_PROFILER
+  #define add_heap(MRB) add_heap(MRB, __FILE__, __LINE__)
+#endif
 
 #define DEFAULT_GC_INTERVAL_RATIO 200
 #define DEFAULT_GC_STEP_RATIO 200
