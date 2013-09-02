@@ -43,7 +43,11 @@ typedef uint32_t mrb_aspec;
 
 struct mrb_state;
 
+#ifdef _MEM_PROFILER
+typedef void* (*mrb_allocf) (struct mrb_state *mrb, void*, size_t, void *ud, const char *, uint32_t line);
+#else
 typedef void* (*mrb_allocf) (struct mrb_state *mrb, void*, size_t, void *ud);
+#endif
 
 #ifndef MRB_ARENA_SIZE
 #define MRB_ARENA_SIZE 100

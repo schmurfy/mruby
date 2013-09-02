@@ -32,7 +32,12 @@ mrb_open_allocf(mrb_allocf f, void *ud)
   mrb_assert(sizeof(void*) == 4);
 #endif
 
+#ifdef _MEM_PROFILER
+  mrb = (mrb_state *)(f)(NULL, NULL, sizeof(mrb_state), ud, __FILE__, __LINE__);
+#else
   mrb = (mrb_state *)(f)(NULL, NULL, sizeof(mrb_state), ud);
+#endif
+  
   if (mrb == NULL) return NULL;
 
   *mrb = mrb_state_zero;
